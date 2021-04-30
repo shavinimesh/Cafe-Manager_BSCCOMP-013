@@ -46,16 +46,17 @@ class FoodItemViewCell: UITableViewCell {
         lblFoodName.text = foodItem.foodName
         imgFoodItem.kf.setImage(with: URL(string: foodItem.foodImgRes))
         lblFoodPrice.text = "RS. \(foodItem.foodPrice)"
+        lblDiscount.text = "\(foodItem.discount)% OFF"
         
-        if foodItem.discount == 0
+       /* if foodItem.discount == 0
         {
-            ViewContainerDiscount.isHidden = true
+            ViewContainerDiscount.isHidden = false
         }
         else
         {
             ViewContainerDiscount.isHidden = false
             lblDiscount.text = "\(foodItem.discount)% OFF"
-        }
+        }*/
     }
     @IBAction func onFoodStatusChanged(_ sender: UISwitch) {
         self.delegate?.onFoodItemStatusChanged(status: sender.isOn, index: self.rowIndex)
@@ -63,13 +64,14 @@ class FoodItemViewCell: UITableViewCell {
     
     func configureCell(foodItem: FoodItem, index: Int) {
         self.rowIndex = index
-        if foodItem.discount == 0 {
-            viewOfferContainer.isHidden = true
-        } else {
+  /*      if foodItem.discount == 0 {
             viewOfferContainer.isHidden = false
             lblDiscount.text = "\(foodItem.discount)% OFF"
-        }
-        
+      } else {
+            viewOfferContainer.isHidden = false
+            lblDiscount.text = "\(foodItem.discount)% OFF"
+        }*/
+        lblDiscount.text = "\(foodItem.discount)% OFF"
         switchIsActive.isOn = foodItem.isActive
         
         imgFoodItem.kf.setImage(with: URL(string: foodItem.foodImgRes))

@@ -101,7 +101,7 @@ class CafeManagerRegisterTests : XCTestCase, FirebaseActions {
                         phoneNo: "0712266686",
                         password: "admin@123", imageRes: "")
         firebaseOP.registerUser(user: user)
-        waitForExpectations(timeout: 10)
+        waitForExpectations(timeout: 15)
         XCTAssertEqual(self.userRegistered, true)
     }
     

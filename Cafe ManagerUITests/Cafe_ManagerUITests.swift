@@ -58,9 +58,9 @@ class TestLogin: XCTestCase {
         app.launch()
                 
         app.txtEmail.tap()
-        app.txtEmail.typeText("hish@gmail.com")
+        app.txtEmail.typeText("thilinalakshan@gmail.com")
         app.txtPassword.tap()
-        app.txtPassword.typeText("idmcc3")
+        app.txtPassword.typeText("Kzqq1430")
         
         app.btnSignIn.tap()
         

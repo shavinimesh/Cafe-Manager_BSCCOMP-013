@@ -15,14 +15,17 @@ class OrderDetailViewController: BaseViewController {
     @IBOutlet weak var tblOrderItems: UITableView!
     @IBOutlet weak var btnReadyOrDone: UIButton!
     @IBOutlet weak var lblCustomerData: UILabel!
+
     
     var order: Order?
-    
+ //   var str1 = "\(order?.customername)"
+//    var str2 = "\(order?.orderID)"
+ 
     override func viewDidLoad() {
         super.viewDidLoad()
         registerNIB()
         containerViewStatus.generateRoundView()
-        
+        lblCustomerData.text = order?.customername
         if self.order?.orderStatus != .ORDER_PREPERATION && self.order?.orderStatus != .ORDER_READY {
             btnReadyOrDone.isHidden = true
         }
