@@ -11,6 +11,7 @@ class SignInViewController: BaseViewController {
 
     @IBOutlet weak var txtEmail: UITextField!
     @IBOutlet weak var txtPassword: UITextField!
+    @IBOutlet var btnSignIN: UIButton!
     
     
     override func viewDidLoad() {
@@ -18,6 +19,10 @@ class SignInViewController: BaseViewController {
         networkMonitor.delegate = self
         firebaseOP.delegate = self
         setTextDelegates()
+        
+        txtEmail.accessibilityIdentifier = "txtEmail"
+        txtPassword.accessibilityIdentifier = "txtPassword"
+        btnSignIN.accessibilityIdentifier = "btnSignIn"
 //        btnSignIn.layer.cornerRadius = 5
         // Do any additional setup after loading the view.
     }

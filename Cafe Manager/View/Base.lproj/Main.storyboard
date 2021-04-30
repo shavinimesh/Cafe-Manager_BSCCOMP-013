@@ -200,6 +200,7 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="btnSignIN" destination="dBa-st-U0w" id="hkT-JL-yW6"/>
                         <outlet property="txtEmail" destination="22N-rn-ydm" id="aQY-V7-iaK"/>
                         <outlet property="txtPassword" destination="8ls-Qx-GCW" id="QMy-IA-hjt"/>
                         <segue destination="GfA-sJ-7Qg" kind="presentation" identifier="signInToHome" modalPresentationStyle="fullScreen" id="yxx-3z-YBA"/>
@@ -1342,7 +1343,7 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="E18-Xu-NEo"/>
+        <segue reference="yxx-3z-YBA"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="Food" width="30" height="30"/>

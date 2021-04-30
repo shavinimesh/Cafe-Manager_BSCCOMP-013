@@ -40,3 +40,32 @@ class Cafe_ManagerUITests: XCTestCase {
         }
     }
 }
+
+private extension XCUIApplication {
+    var txtEmail: XCUIElement { self.textFields["txtEmail"] }
+    var txtPassword: XCUIElement { self.secureTextFields["txtPassword"] }
+    var btnSignIn: XCUIElement { self.buttons["btnSignIn"] }
+    var tblFood: XCUIElement { self.tables["tblOrders"] }
+    
+}
+
+class TestLogin: XCTestCase {
+    private var result: XCTestExpectation!
+    var userFound = false
+    
+    func testLogin() {
+        let app = XCUIApplication()
+        app.launch()
+                
+        app.txtEmail.tap()
+        app.txtEmail.typeText("hish@gmail.com")
+        app.txtPassword.tap()
+        app.txtPassword.typeText("idmcc3")
+        
+        app.btnSignIn.tap()
+        
+        expectation(for: NSPredicate(format : "exists == 1"), evaluatedWith: app.tblFood, handler: nil)
+        
+        waitForExpectations(timeout: 10, handler: nil)
+    }
+}

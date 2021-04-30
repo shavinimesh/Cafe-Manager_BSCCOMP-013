@@ -24,6 +24,7 @@ class OrderViewController: BaseViewController {
         super.viewDidLoad()
         imgProfile.generateRoundImage()
         registerNIB()
+        tblOrders.accessibilityIdentifier = "tblOrders"
     }
     
     override func viewDidAppear(_ animated: Bool) {
