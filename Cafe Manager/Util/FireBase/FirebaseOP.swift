@@ -1,26 +1,22 @@
 //
-//  BaseViewController.swift
-//  Cafe Manager
+//  FirebaseOP.swift
+//  CafeManager
 //
-//  Created by Nimesh Lakshan on 2021-04-28.
+//  Created by Hishara Dilshan on 2021-04-28.
 //
-
-/**
- Utility class to perform the firebase operations such as
- - RealtimeDB Operations
- - Firebase Authentication Operations
- */
 
 import Foundation
 import Firebase
 import FirebaseDatabase
+import FirebaseStorage
+import CoreLocation
 
 class FirebaseOP {
-    
     //Class instance
     static var instance = FirebaseOP()
     
     var dbRef: DatabaseReference!
+    let networkChecker = NetworkMonitor.instance
     
     //Class Delegate
     var delegate: FirebaseActions?
@@ -28,7 +24,13 @@ class FirebaseOP {
     //Make Singleton
     fileprivate init() {}
     
-    // MARK: - Retrieve the realtime database reference
+    func checkConnection() -> Bool {
+        if !networkChecker.isReachable {
+            delegate?.onConnectionLost()
+            return false
+        }
+        return true
+    }
     
     private func getDBReference() -> DatabaseReference {
         guard dbRef != nil else {
@@ -38,13 +40,26 @@ class FirebaseOP {
         return dbRef
     }
     
+    fileprivate func getStorageReference() -> StorageReference {
+        return Storage.storage().reference()
+    }
+    
     // MARK: - User Based Operations
     
     fileprivate func checkExistingUser(email: String, completion: @escaping (Bool, String, DataSnapshot) -> Void) {
+        if !checkConnection() {
+            return
+        }
         let email = email.replacingOccurrences(of: ".", with: "_").replacingOccurrences(of: "@", with: "_")
         self.getDBReference().child("users").child(email).observeSingleEvent(of: .value, with: {
             snapshot in
             if snapshot.hasChildren() {
+                if let userData = snapshot.value as? [String: Any] {
+                    if userData[UserKeys.type] as? String != "manager" {
+                        completion(false, "User does not exists", snapshot)
+                        return
+                    }
+                }
                 completion(true, "User already exists.", snapshot)
             } else {
                 completion(false, "User does not exists", snapshot)
@@ -53,6 +68,9 @@ class FirebaseOP {
     }
     
     fileprivate func setUpAuthenticationAccount(email: String, password: String, completion: @escaping (Bool, String) -> Void) {
+        if !checkConnection() {
+            return
+        }
         Auth.auth().createUser(withEmail: email, password: password, completion: {
             result, error in
             if let error = error {
@@ -67,6 +85,9 @@ class FirebaseOP {
     }
     
     fileprivate func createUserOnDB(user: User, completion: @escaping (Bool, String?, User?) -> Void) {
+        if !checkConnection() {
+            return
+        }
         guard let userName = user.userName, let email = user.email, let phoneNo = user.phoneNo else {
             NSLog("Empty params found on user instance")
             completion(false, "Empty params found on user instance", user)
@@ -77,6 +98,7 @@ class FirebaseOP {
             UserKeys.userName : userName,
             UserKeys.email : email,
             UserKeys.phoneNo : phoneNo,
+            UserKeys.type : "manager"
         ]
         
         self.getDBReference()
@@ -94,16 +116,19 @@ class FirebaseOP {
     }
     
     func registerUser(user: User) {
+        if !checkConnection() {
+            return
+        }
         guard let email = user.email, let password = user.password else {
             NSLog("Empty params found on user instance")
-            self.delegate?.isSignUpFailedWithError(error: FieldErrorCaptions.userAlreadyExistsError)
+            self.delegate?.isSignUpFailedWithError(error: FieldErrorCaptions.userRegistrationFailedError)
             return
         }
         
         self.checkExistingUser(email: email, completion: {
             userExistance, result, data in
             if userExistance {
-                self.delegate?.isExisitingUser(error: FieldErrorCaptions.userRegistrationFailedError)
+                self.delegate?.isExisitingUser(error: FieldErrorCaptions.userAlreadyExistsError)
                 return
             }
             
@@ -129,6 +154,9 @@ class FirebaseOP {
     }
     
     func signInUser(email: String, password: String) {
+        if !checkConnection() {
+            return
+        }
         self.checkExistingUser(email: email, completion: {
             userExistance, result, data in
             
@@ -163,6 +191,9 @@ class FirebaseOP {
     }
     
     func sendResetPasswordRequest(email: String) {
+        if !checkConnection() {
+            return
+        }
         self.checkExistingUser(email: email, completion: {
             userExistance, result, data in
             
@@ -186,7 +217,7 @@ class FirebaseOP {
         })
     }
     
-    func fetchAllFoodItems() {
+    func fetchAllFoodItems(addDefault: Bool = true) {
         self.getDBReference().child("food_category").observeSingleEvent(of: .value, with: {
             snapshot in
             if snapshot.hasChildren() {
@@ -194,7 +225,9 @@ class FirebaseOP {
                 var categoryList: [FoodCategory] = []
                 var foodItemsList: [FoodItem] = []
                 
-                categoryList.append(FoodCategory(categoryName: "All", isSelected: true))
+                if addDefault {
+                    categoryList.append(FoodCategory(categoryID: "All", categoryName: "All", isSelected: true))
+                }
                 
                 if let data = snapshot.value as? [String: Any] {
                     for category in data {
@@ -202,27 +235,29 @@ class FirebaseOP {
                             NSLog("Could not serialize inner data : singleCategory")
                             continue
                         }
-                        categoryList.append(FoodCategory(categoryName: singleCategory[FoodKeys.categoryName] as! String, isSelected: false))
+                        categoryList.append(FoodCategory(categoryID: category.key, categoryName: singleCategory[FoodKeys.categoryName] as! String, isSelected: false))
                         if let foodItems = singleCategory[FoodKeys.food_items] as? [String : Any] {
                             for foodItem in foodItems {
                                 guard let singleFoodItem = foodItem.value as? [String: Any] else {
                                     NSLog("Could not serialize inner data : foodItems in loop")
                                     continue
                                 }
+                                
                                 foodItemsList.append(FoodItem(
+                                                        foodItemID: foodItem.key,
                                                         foodName: singleFoodItem[FoodKeys.foodName] as! String,
                                                         foodDescription: singleFoodItem[FoodKeys.foodDescription] as! String,
                                                         foodPrice: singleFoodItem[FoodKeys.foodPrice] as! Double,
                                                         discount: singleFoodItem[FoodKeys.discount] as! Int,
                                                         foodImgRes: singleFoodItem[FoodKeys.foodImgRes] as! String,
-                                                        foodCategory: singleCategory[FoodKeys.categoryName] as! String))
+                                                        foodCategory: category.key,
+                                                        isActive: singleFoodItem[FoodKeys.isActive] as? Bool ?? true))
                             }
                         } else {
                             NSLog("Could not serialize inner data : foodItems")
-                            self.delegate?.onFoodItemsLoadFailed(error: FieldErrorCaptions.foodDataLoadFailed)
+//                            self.delegate?.onFoodItemsLoadFailed(error: FieldErrorCaptions.foodDataLoadFailed)
                         }
                     }
-                    //                    let sortedFood = foodItemsList.sorted { $0.foodName < $1.foodName }
                     self.delegate?.onCategoriesLoaded(categories: categoryList)
                     self.delegate?.onFoodItemsLoaded(foodItems: foodItemsList.sorted { $0.foodName < $1.foodName })
                 } else {
@@ -236,43 +271,122 @@ class FirebaseOP {
         })
     }
     
-    func placeFoodOrder(order: Order, email: String) {
-        
-        var foodItems : [String: [String : Any]] = [:]
-        for i in 0..<order.orderItems.count {
-            foodItems[String(i)] = [
-                FoodKeys.foodName : order.orderItems[i].foodItem.foodName,
-                FoodKeys.foodPrice : order.orderItems[i].foodItem.foodPrice,
-                OrderKeys.itemCount : order.orderItems[i].qty
-            ]
+    func changeFoodStatus(status: Bool, foodItem: FoodItem, index: Int) {
+        if !checkConnection() {
+            return
         }
-        
-        let data = [
-            OrderKeys.orderStatusCode : order.orderStatusCode,
-            OrderKeys.orderStatusString : order.orderStatusString,
-            OrderKeys.orderDate : order.orderDate.currentTimeMillis(),
-            OrderKeys.itemCount : order.itemCount,
-            OrderKeys.orderTotal : order.orderTotal,
-            OrderKeys.orderItems : foodItems,
-        ] as [String : Any]
-        
-        self.getDBReference().child("orders")
-            .child(email.replacingOccurrences(of: ".", with: "_").replacingOccurrences(of: "@", with: "_"))
-            .childByAutoId()
-            .setValue(data) {
+        self.getDBReference()
+            .child("food_category")
+            .child(foodItem.foodCategory)
+            .child("food_items")
+            .child(foodItem.foodItemID)
+            .child("isActive")
+            .setValue(status) {
                 (error:Error?, ref:DatabaseReference) in
                 if let error = error {
-                    self.delegate?.onOrderPlaceFailedWithError(error: FieldErrorCaptions.orderPlacingError)
+                    self.delegate?.onFoodItemStatusNotChanged(index: index)
                     NSLog(error.localizedDescription)
                 } else {
-                    self.delegate?.onOrderPlaced()
+                    self.delegate?.onFoodItemStatusChanged(index: index, status: status)
                 }
             }
     }
     
-    func getAllOrders(email: String) {
+    func addFoodCategory(categoryName: String) {
+        if !checkConnection() {
+            return
+        }
+        self.getDBReference()
+            .child("food_category")
+            .childByAutoId()
+            .child(FoodKeys.categoryName)
+            .setValue(categoryName) {
+                (error:Error?, ref:DatabaseReference) in
+                if let error = error {
+                    self.delegate?.onFoodCategoryNotAdded()
+                    NSLog(error.localizedDescription)
+                } else {
+                    self.delegate?.onFoodCategoryAdded()
+                }
+            }
+        
+    }
+    
+    func removeFoodCategory(categoryID: String) {
+        self.getDBReference()
+            .child("food_category")
+            .child(categoryID)
+            .removeValue() {
+                (error:Error?, ref:DatabaseReference) in
+                if let error = error {
+                    self.delegate?.onFoodCategoryNotRemoved()
+                    NSLog(error.localizedDescription)
+                } else {
+                    self.delegate?.onFoodCategoryRemoved()
+                }
+            }
+    }
+    
+    func addFoodItem(foodItem: FoodItem, image: UIImage) {
+        if !checkConnection() {
+            return
+        }
+        if let uploadData = image.jpegData(compressionQuality: 0.5) {
+            
+            let metaData = StorageMetadata()
+            metaData.contentType = "image/jpeg"
+            
+            getStorageReference().child("foodItemImages").child(foodItem.foodName).putData(uploadData, metadata: metaData) {
+                meta, error in
+                
+                if let error = error {
+                    NSLog("Unable to complete upload, Error : " + error.localizedDescription)
+                    self.delegate?.onFoodItemNotAdded()
+                    return
+                }
+                
+                self.getStorageReference().child("foodItemImages").child(foodItem.foodName).downloadURL(completion: {
+                    (url,error) in
+                    guard let downloadURL = url else {
+                        if let error = error {
+                            NSLog("Unable to get download URL, Error : " + error.localizedDescription)
+                        }
+                        self.delegate?.onFoodItemNotAdded()
+                        return
+                    }
+                    
+                    let data = [
+                        FoodKeys.foodName : foodItem.foodName,
+                        FoodKeys.foodDescription : foodItem.foodDescription,
+                        FoodKeys.foodPrice : foodItem.foodPrice,
+                        FoodKeys.discount : foodItem.discount,
+                        FoodKeys.foodImgRes : downloadURL.absoluteString,
+                        FoodKeys.categoryName : foodItem.foodCategory,
+                        FoodKeys.isActive : true
+                    ] as [String : Any]
+                    
+                    
+                    self.getDBReference()
+                        .child("food_category")
+                        .child(foodItem.foodCategory)
+                        .child("food_items")
+                        .childByAutoId()
+                        .setValue(data) {
+                            (error:Error?, ref:DatabaseReference) in
+                            if let error = error {
+                                self.delegate?.onFoodItemNotAdded()
+                                NSLog(error.localizedDescription)
+                            } else {
+                                self.delegate?.onFoodItemAdded()
+                            }
+                        }
+                })
+            }
+        }
+    }
+    
+    func getAllOrders() {
         self.getDBReference().child("orders")
-            .child(email.replacingOccurrences(of: ".", with: "_").replacingOccurrences(of: "@", with: "_"))
             .observeSingleEvent(of: .value, with: {
                 snapshot in
                 if snapshot.hasChildren() {
@@ -283,13 +397,15 @@ class FirebaseOP {
                                 NSLog("Could not serialize inner data : singleOrder")
                                 continue
                             }
+                            print(orderData.keys)
                             var order = Order()
-                            order.orderID = "\(orderData[OrderKeys.orderDate] as! Int64)"
+                            order.orderID = singleOrder.key
                             order.itemCount = orderData[OrderKeys.itemCount] as! Int
                             order.orderDate = Date().getDateFromMills(dateInMills: orderData[OrderKeys.orderDate] as! Int64)
                             order.orderStatusCode = orderData[OrderKeys.orderStatusCode] as! Int
                             order.orderStatusString = orderData[OrderKeys.orderStatusString] as! String
                             order.orderTotal = orderData[OrderKeys.orderTotal] as! Double
+                            order.customername = orderData[OrderKeys.customerName] as! String
                             if let foodItems = orderData[OrderKeys.orderItems] as? NSArray {
                                 var orderItems: [OrderItem] = []
                                 for i in 0..<foodItems.count {
@@ -301,7 +417,8 @@ class FirebaseOP {
                                                                                     foodDescription: "",
                                                                                     foodPrice: foodItem[FoodKeys.foodPrice] as! Double,
                                                                                     discount: 0,
-                                                                                    foodImgRes: ""),
+                                                                                    foodImgRes: "",
+                                                                                    isActive: true),
                                                                  qty: foodItem[OrderKeys.itemCount] as! Int))
                                 }
                                 
@@ -331,64 +448,57 @@ class FirebaseOP {
                     }
                     
                 } else {
+                    NSLog("No orders found!")
                     self.delegate?.onAllOrdersLoadFailed(error: FieldErrorCaptions.noOrdersFound)
                 }
             })
     }
     
-    func updateUser(user: User) {
-        guard let userName = user.userName, let email = user.email, let phoneNo = user.phoneNo else {
-            NSLog("Empty params found on user instance")
-            delegate?.onUserUpdateFailed(error: FieldErrorCaptions.updateUserFailed)
-            return
-        }
-        
-        let data = [
-            UserKeys.userName : userName,
-            UserKeys.phoneNo : phoneNo,
-        ]
-        
+    func changeOrderStatus(order: Order, status: Int) {
         self.getDBReference()
-            .child("users")
-            .child(email.replacingOccurrences(of: ".", with: "_").replacingOccurrences(of: "@", with: "_"))
-            .updateChildValues(data) {
+            .child("orders")
+            .child(order.orderID)
+            .child(OrderKeys.orderStatusCode)
+            .setValue(status) {
                 (error:Error?, ref:DatabaseReference) in
                 if let error = error {
-                    self.delegate?.onUserUpdateFailed(error: FieldErrorCaptions.updateUserFailed)
+                    self.delegate?.onOrderStatusNotChanged()
                     NSLog(error.localizedDescription)
                 } else {
-                    self.delegate?.onUserDataUpdated(user: user)
+                    self.delegate?.onOrderStatusChanged(status: status)
                 }
             }
     }
     
-    func updateUserPassword(email: String, newPassword: String, existingPassword: String) {
-        let user = Auth.auth().currentUser
-        let credential = EmailAuthProvider.credential(withEmail: email, password: existingPassword)
-        
-        user?.reauthenticate(with: credential) { data, error  in
-          if let error = error {
-            NSLog(error.localizedDescription)
-            self.delegate?.onPasswordChangeFailedWithError(error: FieldErrorCaptions.invalidExistingPassword)
-          } else {
-            Auth.auth().currentUser?.updatePassword(to: newPassword, completion: {
-                error in
-                if let error = error {
-                    self.delegate?.onPasswordChangeFailedWithError(error: FieldErrorCaptions.updatePasswordFailed)
-                    NSLog(error.localizedDescription)
-                } else {
-                    self.delegate?.onPasswordChanged()
+    func getUserLocationUpdates(order: Order) {
+        self.getDBReference().child("orders")
+            .child(order.orderID)
+            .observe(.childChanged, with: {
+                snapshot in
+                if snapshot.hasChildren() {
+                    guard let data = snapshot.value as? [String:Double] else {
+                        return
+                    }
+                    print(data)
+                    let coordinate = CLLocation(latitude: data["lat"] ?? 0, longitude: data["lon"] ?? 0)
+                    print("Distance : \(coordinate.distance(from: CafeterriaLocation.location))")
+                    //Distance in meters
+                    if coordinate.distance(from: CafeterriaLocation.location) <= 100 {
+                        self.delegate?.onCustomerLocationUpdated(status: 3)
+                    } else {
+                        self.delegate?.onCustomerLocationUpdated(status: 2)
+                    }
                 }
             })
-          }
-        }
     }
     
 }
-
 // MARK: - List of Protocol handlers
 
 protocol FirebaseActions {
+    
+    func onConnectionLost()
+    
     func isSignUpSuccessful(user: User?)
     func isExisitingUser(error: String)
     func isSignUpFailedWithError(error: Error)
@@ -412,13 +522,25 @@ protocol FirebaseActions {
     func onFoodItemsLoaded(foodItems: [FoodItem])
     func onFoodItemsLoadFailed(error: String)
     
-    func onOrderPlaced()
-    func onOrderPlaceFailedWithError(error: String)
+    func onFoodItemStatusChanged(index: Int, status: Bool)
+    func onFoodItemStatusNotChanged(index: Int)
+    
+    func onFoodCategoryAdded()
+    func onFoodCategoryNotAdded()
+    
+    func onFoodCategoryRemoved()
+    func onFoodCategoryNotRemoved()
+    
+    func onFoodItemAdded()
+    func onFoodItemNotAdded()
     
     func onAllOrdersLoaded(orderedList: [Order])
     func onAllOrdersLoadFailed(error: String)
     
-    func onOperationsCancelled()
+    func onOrderStatusChanged(status: Int)
+    func onOrderStatusNotChanged()
+    
+    func onCustomerLocationUpdated(status: Int)
 }
 
 // MARK: - Protocol Extensions
@@ -443,15 +565,27 @@ extension FirebaseActions {
     func onResetPasswordEmailSent(){}
     func onResetPasswordEmailSentFailed(error: String){}
     
-    func onCategoriesLoaded(categories: [FoodCategory]) {}
-    func onFoodItemsLoaded(foodItems: [FoodItem]) {}
-    func onFoodItemsLoadFailed(error: String) {}
+    func onCategoriesLoaded(categories: [FoodCategory]){}
+    func onFoodItemsLoaded(foodItems: [FoodItem]){}
+    func onFoodItemsLoadFailed(error: String){}
     
-    func onOrderPlaced() {}
-    func onOrderPlaceFailedWithError(error: String) {}
+    func onFoodItemStatusChanged(index: Int, status: Bool){}
+    func onFoodItemStatusNotChanged(index: Int){}
     
-    func onAllOrdersLoaded(orderedList: [Order]) {}
-    func onAllOrdersLoadFailed(error: String) {}
+    func onFoodCategoryAdded(){}
+    func onFoodCategoryNotAdded(){}
     
-    func onOperationsCancelled(){}
+    func onFoodCategoryRemoved(){}
+    func onFoodCategoryNotRemoved(){}
+    
+    func onFoodItemAdded(){}
+    func onFoodItemNotAdded(){}
+    
+    func onAllOrdersLoaded(orderedList: [Order]){}
+    func onAllOrdersLoadFailed(error: String){}
+    
+    func onOrderStatusChanged(status: Int){}
+    func onOrderStatusNotChanged(){}
+    
+    func onCustomerLocationUpdated(status: Int){}
 }

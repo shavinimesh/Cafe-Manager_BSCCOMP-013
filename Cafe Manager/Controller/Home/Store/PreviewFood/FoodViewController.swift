@@ -6,11 +6,13 @@
 //
 
 import UIKit
+import Lottie
 
 class FoodViewController: BaseViewController {
 
     @IBOutlet weak var tblFoodItems: UITableView!
     @IBOutlet weak var collectionViewCategories: UICollectionView!
+    
     
     var selectedCategoryIndex: Int = 0
     var selectedFoodIndex: Int = 0
@@ -19,45 +21,53 @@ class FoodViewController: BaseViewController {
     var foodItemList: [FoodItem] = []
     
     var filteredFood: [FoodItem] = []
-    
+        
     override func viewDidLoad() {
         super.viewDidLoad()
-        //        let nib = UINib(nibName: "FoodItemViewCell", bundle: nil)
-        tblFoodItems.register(UINib(nibName: FoodItemViewCell.nibName, bundle: nil), forCellReuseIdentifier: FoodItemViewCell.reuseIdentifier)
-        collectionViewCategories.register(UINib(nibName: CategoryViewCell.nibName, bundle: nil), forCellWithReuseIdentifier: CategoryViewCell.reuseIdentifier)
-        if let flowLayout = self.collectionViewCategories?.collectionViewLayout as? UICollectionViewFlowLayout {
-            flowLayout.estimatedItemSize = CGSize(width: 100, height: 30)
-        }
-        
-        super.viewDidLoad()
-        networkMonitor.delegate = self
-        firebaseOP.delegate = self
-        firebaseOP.fetchAllFoodItems()
-        displayProgress()
+        // Do any additional setup after loading the view.
     }
-    
-   // override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-    //    if segue.identifier == "FoodDetailsViewController" {
-    //        let destVC = segue.destination as! FoodDetailsViewController
-     //       destVC.foodItem = filteredFood[selectedFoodIndex]
-       // }
-   // }
     
     override func viewDidAppear(_ animated: Bool) {
         firebaseOP.delegate = self
-        networkMonitor.delegate = self
+        registerNIB()
+        
+        if #available(iOS 10.0, *) {
+            tblFoodItems.refreshControl = refreshControl
+        } else {
+            tblFoodItems.addSubview(refreshControl)
+        }
+        refreshControl.addTarget(self, action: #selector(refreshFoodData), for: .valueChanged)
+//        displayProgress()
+       // displayAnimation()
+        firebaseOP.fetchAllFoodItems()
     }
     
-    /*
-     // MARK: - Navigation
-     
-     // In a storyboard-based application, you will often want to do a little preparation before navigation
-     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-     // Get the new view controller using segue.destination.
-     // Pass the selected object to the new view controller.
-     }
-     */
+    func registerNIB() {
+        let collectionViewNib = UINib(nibName: CategoryViewCell.nibName, bundle: nil)
+        collectionViewCategories.register(collectionViewNib, forCellWithReuseIdentifier: CategoryViewCell.reuseIdentifier)
+        if let flowLayout = self.collectionViewCategories?.collectionViewLayout as? UICollectionViewFlowLayout {
+            flowLayout.estimatedItemSize = CGSize(width: 80, height: 30)
+        }
+        tblFoodItems.register(UINib(nibName: FoodItemViewCell.nibName, bundle: nil), forCellReuseIdentifier: FoodItemViewCell.reuseIdentifier)
+    }
     
+    @objc func refreshFoodData() {
+//        displayProgress()
+      //  displayAnimation()
+        firebaseOP.fetchAllFoodItems()
+    }
+    
+   /* func displayAnimation() {
+        animationViewFood.loopMode = .loop
+        animationViewFood.isHidden = false
+        animationViewFood.play()
+    }
+    
+    func dismissAnimation() {
+        animationViewFood.stop()
+        animationViewFood.isHidden = true
+    }*/
+
 }
 
 extension FoodViewController {
@@ -73,8 +83,6 @@ extension FoodViewController {
         tblFoodItems.reloadData()
     }
 }
-
-//UITableView Protocols
 
 extension FoodViewController : UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -101,7 +109,7 @@ extension FoodViewController : UICollectionViewDataSource, UICollectionViewDeleg
             return
         }
         
-        filterFood(foodCategory: categories[indexPath.row].categoryName)
+        filterFood(foodCategory: categories[indexPath.row].categoryID)
     }
     
     func collectionView(_ collectionView: UICollectionView,
@@ -120,6 +128,12 @@ extension FoodViewController : UICollectionViewDataSource, UICollectionViewDeleg
     }
 }
 
+extension FoodViewController: FoodItemCellActions {
+    func onFoodItemStatusChanged(status: Bool, index: Int) {
+        displayProgress()
+        firebaseOP.changeFoodStatus(status: status, foodItem: foodItemList[index], index: index)
+    }
+}
 
 extension FoodViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -129,13 +143,14 @@ extension FoodViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tblFoodItems.dequeueReusableCell(withIdentifier: FoodItemViewCell.reuseIdentifier, for: indexPath) as! FoodItemViewCell
         cell.selectionStyle = .none
-        cell.configCell(foodItem: filteredFood[indexPath.row])
+        cell.delegate = self
+        cell.configureCell(foodItem: filteredFood[indexPath.row], index: indexPath.row)
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         selectedFoodIndex = indexPath.row
-        self.performSegue(withIdentifier: "FoodDetailsViewController", sender: nil)
+//        self.performSegue(withIdentifier: StoryBoardSegues.homeToViewDetails, sender: nil)
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
@@ -148,16 +163,26 @@ extension FoodViewController: UITableViewDelegate, UITableViewDataSource {
 }
 
 extension FoodViewController : FirebaseActions {
-    func onCategoriesLoaded(categories: [FoodCategory]) {
+    func onConnectionLost() {
         refreshControl.endRefreshing()
-        dismissProgress()
+//        dismissProgress()
+     //   dismissAnimation()
+        displayWarningMessage(message: "Please check internet connection")
+    }
+    func onCategoriesLoaded(categories: [FoodCategory]) {
+        NSLog("Categories Loaded")
+        refreshControl.endRefreshing()
+//        dismissProgress()
+      //  dismissAnimation()
         self.categories.removeAll()
         self.categories.append(contentsOf: categories)
         self.collectionViewCategories.reloadData()
     }
     func onFoodItemsLoaded(foodItems: [FoodItem]) {
+        NSLog("Food Items Loaded")
         refreshControl.endRefreshing()
-        dismissProgress()
+        //        dismissProgress()
+    //    dismissAnimation()
         foodItemList.removeAll()
         filteredFood.removeAll()
         self.foodItemList.append(contentsOf: foodItems)
@@ -166,7 +191,21 @@ extension FoodViewController : FirebaseActions {
     }
     func onFoodItemsLoadFailed(error: String) {
         refreshControl.endRefreshing()
-        dismissProgress()
+        //        dismissProgress()
+    //    dismissAnimation()
         displayErrorMessage(message: error)
     }
+    func onFoodItemStatusChanged(index: Int, status: Bool) {
+        self.foodItemList[index].isActive = status
+        self.filteredFood[index].isActive = status
+        dismissProgress()
+        displaySuccessMessage(message: "Status Changed", completion: nil)
+        tblFoodItems.reloadRows(at: [IndexPath(row: index, section: 0)], with: .fade)
+    }
+    func onFoodItemStatusNotChanged(index: Int) {
+        tblFoodItems.reloadData()
+        dismissProgress()
+        displayErrorMessage(message: "Could not change status")
+    }
 }
+

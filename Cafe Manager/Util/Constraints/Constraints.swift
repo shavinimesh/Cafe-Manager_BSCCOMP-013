@@ -5,8 +5,16 @@
 //  Created by Nimesh Lakshan on 2021-04-28.
 //
 
-import Foundation
+import CoreLocation
 
+struct StoryBoardSegues {
+    static let signInToHome = "signInToHome"
+    static let signUpHome = "signUpHome"
+    static let ordersToOrderInfo = "ordersToOrderInfo"
+    static let AccountToPreview = "AccountToPreview"
+}
+
+//Name of the SessionVariables
 struct UserSession {
     static let USER_SESSION = "USER_SESSION"
     static let IS_LOGGED_IN = "AUTH_STATE"
@@ -29,15 +37,13 @@ struct FieldErrorCaptions {
     static let noFoodItems = "No food Items found."
     static let foodDataLoadFailed = "Could not load foods!"
     
-    static let orderPlacingError = "Unable to place order!"
-    
-    static let noOrdersFound = "No orders found!"
-    static let orderLoadFailed = "Failed to load orders!"
-    
     static let updateUserFailed = "Failed to update user!"
     
     static let updatePasswordFailed = "Faild to update password!"
     static let invalidExistingPassword = "Invalid existing password!"
+    
+    static let noOrdersFound = "No orders found!"
+    static let orderLoadFailed = "Failed to load orders!"
 }
 
 struct InputErrorCaptions {
@@ -46,6 +52,11 @@ struct InputErrorCaptions {
     static let invalidName = "Invalid Name"
     static let invalidPhoneNo = "Invalid phone no."
     static let passwordNotMatched = "Passwords does not match"
+    static let invaliCategorydName = "Invalid category"
+    static let invalidFoodName = "Invalid food name"
+    static let invalidFoodPrice = "Invalid food price"
+    static let invalidFoodDescription = "Invalid food description"
+    static let invalidDiscount = "Invalid discount"
 }
 
 struct AppConfig {
@@ -60,6 +71,7 @@ class UserKeys {
     class var email : String { return "email" }
     class var phoneNo : String { return "phoneNo" }
     class var password : String { return "password" }
+    class var type : String { return "type" }
 }
 
 class FoodKeys {
@@ -70,6 +82,7 @@ class FoodKeys {
     class var foodImgRes: String { return "foodImgRes" }
     class var foodName: String { return "foodName" }
     class var foodPrice: String { return "foodPrice" }
+    class var isActive: String { return "isActive" }
 }
 
 class OrderKeys {
@@ -80,5 +93,12 @@ class OrderKeys {
     class var itemCount: String { return "itemCount" }
     class var orderTotal: String { return "orderTotal" }
     class var orderItems: String { return "orderItems" }
+    class var customerName: String { return "customerName" }
+    class var customerEmailEscapedString: String { return "customerEmail" }
 }
 
+class CafeterriaLocation {
+    class var location: CLLocation {
+        return CLLocation(latitude: 6.90636, longitude: 79.87066)
+    }
+}

@@ -54,6 +54,6 @@ class SessionManager {
     //Clears all saved sessions
     class func clearUserSession(){
         UserDefaults.standard.removeObject(forKey: UserSession.USER_SESSION)
-        UserDefaults.standard.removeObject(forKey: UserSession.IS_LOGGED_IN)
+        UserDefaults.standard.setValue(false,forKey: UserSession.IS_LOGGED_IN)
     }
 }

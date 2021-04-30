@@ -7,15 +7,18 @@ target 'Cafe Manager' do
 
   # Pods for Cafe Manager
 
+pod 'ListPlaceholder'
 pod 'Firebase/Auth'
 pod 'Firebase/Database'
-pod 'ListPlaceholder'
 pod 'Kingfisher'
 pod 'SwiftyJSON'
 pod "Connectivity"
 pod 'Loaf'
+pod 'lottie-ios'
 pod 'RealmSwift'
 pod 'IQKeyboardManagerSwift'
+pod 'NotificationBannerSwift', '~> 3.0.0'
+pod 'Firebase/Storage'
 
   target 'Cafe ManagerTests' do
     inherit! :search_paths

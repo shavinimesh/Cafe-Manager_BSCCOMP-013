@@ -7,7 +7,6 @@
 
 import Foundation
 
-
 extension Double {
     var lkrString: String {
         return String(format: "RS. %.2f", self)

@@ -10,11 +10,25 @@ import UIKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
-    
+
+
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
+        
+        guard let _ = (scene as? UIWindowScene) else { return }
+        if SessionManager.authState {
+            NSLog("User session found")
+            let nc = UIStoryboard.init(name: "Main", bundle: Bundle.main).instantiateInitialViewController()!
+            setAsRootViewCOntroller(_controller: nc)
+        } else{
+            NSLog("User session not found")
+//            let nc = UIStoryboard.init(name: "Main", bundle: Bundle.main).instantiateViewController(withIdentifier: "Launch")
+            let nc = UIStoryboard.init(name: "Auth", bundle: Bundle.main).instantiateInitialViewController()!
+            setAsRootViewCOntroller(_controller: nc)
+        }
+        
         guard let _ = (scene as? UIWindowScene) else { return }
     }
 
@@ -46,6 +60,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // to restore the scene back to its current state.
     }
 
+    func setAsRootViewCOntroller(_controller: UIViewController) {
+        if window != nil {
+            window?.rootViewController = _controller
+        }
+    }
 
 }
 

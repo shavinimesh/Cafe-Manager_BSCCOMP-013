@@ -8,37 +8,6 @@
 import Foundation
 import RealmSwift
 
-struct FoodCategory {
-    var categoryName: String
-    var isSelected: Bool
-}
-
-struct FoodItem {
-    var foodName: String
-    var foodDescription: String
-    var foodPrice: Double
-    var discount: Int
-    var foodImgRes: String
-    var foodCategory: String = ""
-    var discountedPrice: Double {
-        return foodPrice - (foodPrice * (Double(discount)/100))
-    }
-}
-
-class CartItem: Object {
-    @objc dynamic var itemName: String = ""
-    @objc dynamic var itemImgRes: String = ""
-    @objc dynamic var discount: Int = 0
-    @objc dynamic var itemPrice: Double = 0
-    @objc dynamic var itemCount: Int = 0
-    var itemTotal: Double {
-        return Double(itemCount) *  discountedPrice
-    }
-    var discountedPrice: Double {
-        return itemPrice - (itemPrice * (Double(discount)/100))
-    }
-}
-
 struct User: Codable {
     var _id: String?
     var userName: String?
@@ -67,24 +36,54 @@ struct User: Codable {
     }
 }
 
+struct FoodCategory {
+    var categoryID: String
+    var categoryName: String
+    var isSelected: Bool
+}
+
+struct FoodItem {
+    var foodItemID: String = ""
+    var foodName: String
+    var foodDescription: String
+    var foodPrice: Double
+    var discount: Int
+    var foodImgRes: String
+    var foodCategory: String = ""
+    var isActive: Bool
+    var discountedPrice: Double {
+        return foodPrice - (foodPrice * (Double(discount)/100))
+    }
+}
+
 struct Order {
     var orderID: String = ""
     var orderStatus: OrderStatus {
-        if orderStatusCode == 0 {
+        switch orderStatusCode {
+        case 0:
             return .ORDER_PENDING
-        }
-        if orderStatusCode == 1 {
+        case 1:
+            return .ORDER_PREPERATION
+        case 2:
             return .ORDER_READY
+        case 3:
+            return .ORDER_ARRIVING
+        case 4:
+            return .ORDER_COMPLETED
+        case 5:
+            return .ORDER_CANCELLED
+        default:
+            return .ORDER_CANCELLED
         }
-        return .ORDER_COMPLETED
     }
-    //0 = Pending Order | 1 = Order ready | 2 = completed
+
     var orderStatusCode: Int = 0
     var orderStatusString: String = ""
     var orderDate: Date = Date()
     var itemCount: Int = 0
     var orderTotal: Double = 0
     var orderItems: [OrderItem] = []
+    var customername: String = ""
 }
 
 struct OrderItem {
@@ -92,8 +91,20 @@ struct OrderItem {
     var qty: Int
 }
 
-enum OrderStatus {
-    case ORDER_PENDING
-    case ORDER_READY
-    case ORDER_COMPLETED
+enum OrderStatus: String {
+    case ORDER_PENDING = "Pending"//0
+    case ORDER_PREPERATION = "Prep."//1
+    case ORDER_READY = "Ready"//2
+    case ORDER_ARRIVING = "Arrived"//3
+    case ORDER_COMPLETED = "Done"//4
+    case ORDER_CANCELLED = "Cancel"//5
+}
+
+struct OrderStatusInt {
+    static let ORDER_PENDING = 0
+    static let ORDER_PREPERATION = 1
+    static let ORDER_READY = 2
+    static let ORDER_ARRIVING = 3
+    static let ORDER_COMPLETED = 4
+    static let ORDER_CANCELLED = 5
 }

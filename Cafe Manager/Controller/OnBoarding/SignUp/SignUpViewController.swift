@@ -119,6 +119,12 @@ extension SignUpViewController : UITextFieldDelegate {
 }
 
 extension SignUpViewController : FirebaseActions {
+    func onConnectionLost() {
+        refreshControl.endRefreshing()
+        dismissProgress()
+        displayWarningMessage(message: "Please check internet connection")
+    }
+    
     func isSignUpSuccessful(user: User?) {
         dismissProgress()
         if let user = user {

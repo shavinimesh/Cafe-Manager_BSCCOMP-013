@@ -67,6 +67,12 @@ extension SignInViewController: UITextFieldDelegate {
 }
 
 extension SignInViewController: FirebaseActions {
+    func onConnectionLost() {
+        refreshControl.endRefreshing()
+        dismissProgress()
+        displayWarningMessage(message: "Please check internet connection")
+    }
+    
     func onUserNotRegistered(error: String) {
         dismissProgress()
         displayErrorMessage(message: error)

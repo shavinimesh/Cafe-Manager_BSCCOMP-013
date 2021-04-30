@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <customFonts key="customFonts">
+        <array key="Montserrat-Bold.ttf">
+            <string>Montserrat-Bold</string>
+        </array>
+        <array key="Montserrat-SemiBold.ttf">
+            <string>Montserrat-SemiBold</string>
+        </array>
+    </customFonts>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" id="KGk-i7-Jjw" customClass="OrderSummaryCell" customModule="Cafe_Manager" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="332" height="127"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="332" height="127"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="56o-Wf-XPU">
+                        <rect key="frame" x="0.0" y="10" width="332" height="107"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="252" text="24.02.2020" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="JWp-is-kf7">
+                                <rect key="frame" x="20" y="10" width="80.5" height="19"/>
+                                <fontDescription key="fontDescription" name="Montserrat-Bold" family="Montserrat" pointSize="16"/>
+                                <color key="textColor" name="dark_gray"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="252" text="Total : Rs. 0000.00" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cEx-LP-8jQ">
+                                <rect key="frame" x="187" y="75" width="125" height="22"/>
+                                <fontDescription key="fontDescription" name="Montserrat-Bold" family="Montserrat" pointSize="15"/>
+                                <color key="textColor" name="orange"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="TrT-PK-qSv">
+                                <rect key="frame" x="20" y="29" width="292" height="36"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Name" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aJx-ko-AuT">
+                                        <rect key="frame" x="0.0" y="0.0" width="136" height="36"/>
+                                        <fontDescription key="fontDescription" name="Montserrat-SemiBold" family="Montserrat" pointSize="12"/>
+                                        <color key="textColor" name="dark_gray"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Qty with Price" textAlignment="right" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4xS-iY-I0g">
+                                        <rect key="frame" x="156" y="0.0" width="136" height="36"/>
+                                        <fontDescription key="fontDescription" name="Montserrat-SemiBold" family="Montserrat" pointSize="12"/>
+                                        <color key="textColor" name="dark_gray"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                            </stackView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TaL-CE-B4v">
+                                <rect key="frame" x="20" y="75" width="62" height="22"/>
+                                <color key="backgroundColor" name="dark"/>
+                                <inset key="contentEdgeInsets" minX="15" minY="2" maxX="15" maxY="2"/>
+                                <state key="normal" title="Print">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="5"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="onPrintPressed:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="oUs-bw-EAH"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" name="light_gray_1"/>
+                        <constraints>
+                            <constraint firstItem="TrT-PK-qSv" firstAttribute="leading" secondItem="56o-Wf-XPU" secondAttribute="leading" constant="20" id="0Oc-eH-UQa"/>
+                            <constraint firstItem="TaL-CE-B4v" firstAttribute="top" secondItem="TrT-PK-qSv" secondAttribute="bottom" constant="10" id="EVk-Oc-rED"/>
+                            <constraint firstItem="JWp-is-kf7" firstAttribute="leading" secondItem="56o-Wf-XPU" secondAttribute="leading" constant="20" id="MZk-1N-1dl"/>
+                            <constraint firstItem="TrT-PK-qSv" firstAttribute="top" secondItem="JWp-is-kf7" secondAttribute="bottom" id="PbS-A0-WTU"/>
+                            <constraint firstAttribute="bottom" secondItem="cEx-LP-8jQ" secondAttribute="bottom" constant="10" id="WRg-bR-eZn"/>
+                            <constraint firstItem="JWp-is-kf7" firstAttribute="top" secondItem="56o-Wf-XPU" secondAttribute="top" constant="10" id="lLZ-ZB-d9M"/>
+                            <constraint firstItem="TaL-CE-B4v" firstAttribute="leading" secondItem="56o-Wf-XPU" secondAttribute="leading" constant="20" symbolic="YES" id="qf2-DV-9xj"/>
+                            <constraint firstAttribute="bottom" secondItem="TaL-CE-B4v" secondAttribute="bottom" constant="10" id="uDH-M3-3z5"/>
+                            <constraint firstAttribute="trailing" secondItem="TrT-PK-qSv" secondAttribute="trailing" constant="20" id="vbW-nb-NGR"/>
+                            <constraint firstAttribute="trailing" secondItem="cEx-LP-8jQ" secondAttribute="trailing" constant="20" id="vhV-Jn-k3d"/>
+                            <constraint firstItem="cEx-LP-8jQ" firstAttribute="top" secondItem="TrT-PK-qSv" secondAttribute="bottom" constant="10" id="xoc-T6-q1y"/>
+                        </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                <integer key="value" value="10"/>
+                            </userDefinedRuntimeAttribute>
+                        </userDefinedRuntimeAttributes>
+                    </view>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="56o-Wf-XPU" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="6s6-8W-bLl"/>
+                    <constraint firstAttribute="trailing" secondItem="56o-Wf-XPU" secondAttribute="trailing" id="cri-XO-c1T"/>
+                    <constraint firstItem="56o-Wf-XPU" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="10" id="keF-gI-kTx"/>
+                    <constraint firstAttribute="bottom" secondItem="56o-Wf-XPU" secondAttribute="bottom" constant="10" id="xa2-bZ-0d3"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
+            <connections>
+                <outlet property="lblDate" destination="JWp-is-kf7" id="Czh-ai-Sfb"/>
+                <outlet property="lblItemInfo" destination="4xS-iY-I0g" id="c8L-Wn-mkk"/>
+                <outlet property="lblItemNames" destination="aJx-ko-AuT" id="HZi-st-tbP"/>
+                <outlet property="lblTotalAmount" destination="cEx-LP-8jQ" id="dd3-OK-w1N"/>
+            </connections>
+            <point key="canvasLocation" x="-25" y="134"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <namedColor name="dark">
+            <color red="0.32899999618530273" green="0.32400000095367432" blue="0.4779999852180481" alpha="0.33000001311302185" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="dark_gray">
+            <color red="0.45899999141693115" green="0.49399998784065247" blue="0.5220000147819519" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="light_gray_1">
+            <color red="0.96100002527236938" green="0.9570000171661377" blue="0.97600001096725464" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="orange">
+            <color red="0.89800000190734863" green="0.31400001049041748" blue="0.22400000691413879" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

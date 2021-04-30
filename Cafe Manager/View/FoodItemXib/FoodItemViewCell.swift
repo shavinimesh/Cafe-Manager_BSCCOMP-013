@@ -16,6 +16,11 @@ class FoodItemViewCell: UITableViewCell {
     @IBOutlet weak var lblDiscount: UILabel!
     @IBOutlet weak var ViewContainerDiscount: UIView!
     @IBOutlet weak var imgFoodItem: UIImageView!
+    @IBOutlet weak var switchIsActive: UISwitch!
+    @IBOutlet weak var viewOfferContainer: UIView!
+    
+    var rowIndex: Int = 0
+    var delegate: FoodItemCellActions?
     
     class var reuseIdentifier: String {
         return "FoodCellIdentifier"
@@ -52,7 +57,31 @@ class FoodItemViewCell: UITableViewCell {
             lblDiscount.text = "\(foodItem.discount)% OFF"
         }
     }
-    
+    @IBAction func onFoodStatusChanged(_ sender: UISwitch) {
+        self.delegate?.onFoodItemStatusChanged(status: sender.isOn, index: self.rowIndex)
     }
     
+    func configureCell(foodItem: FoodItem, index: Int) {
+        self.rowIndex = index
+        if foodItem.discount == 0 {
+            viewOfferContainer.isHidden = true
+        } else {
+            viewOfferContainer.isHidden = false
+            lblDiscount.text = "\(foodItem.discount)% OFF"
+        }
+        
+        switchIsActive.isOn = foodItem.isActive
+        
+        imgFoodItem.kf.setImage(with: URL(string: foodItem.foodImgRes))
+        lblFoodName.text = foodItem.foodName
+        lblFoodInfo.text = foodItem.foodDescription
+        lblFoodPrice.text = "\(foodItem.discountedPrice.lkrString)"
+    }
+    
+}
+
+protocol FoodItemCellActions {
+    func onFoodItemStatusChanged(status: Bool, index: Int)
+}
+
 

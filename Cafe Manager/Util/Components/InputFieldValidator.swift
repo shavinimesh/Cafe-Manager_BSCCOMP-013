@@ -16,8 +16,29 @@ class InputFieldValidator {
     static let NICRegEx = "^([0-9]{9}[x|X|v|V]|[0-9]{12})$"
     static let mobileRegex = "^(07)(0|1|2|5|6|7|8)[\\d]{7}$"
     static let accountNoRegex = "[0-9]{5,30}"
+    static let priceRegex = "[0-9]{1,4}"
+    static let discountRegex = "[0-9]{1,2}"
     static let bankDetailsRegex = "[A-Za-z ]{2,100}"
+    static let foodDescriptionPattern = "^[a-zA-Z0-9 ]{2,200}$"
 //    static let mobileRegex = "^(0)?(?:7(0|1|2|5|6|7|8)\\d)\\d{6}$"
+    
+    //Validate the Food Price
+    static func isValidDiscount(_ discount: String) -> Bool {
+        let discountPred = NSPredicate(format:"SELF MATCHES %@", discountRegex)
+        return discountPred.evaluate(with: discount)
+    }
+    
+    //Validate the Food Price
+    static func isValidPrice(_ price: String) -> Bool {
+        let pricePred = NSPredicate(format:"SELF MATCHES %@", priceRegex)
+        return pricePred.evaluate(with: price)
+    }
+    
+    //Validate the Food description
+    static func isValidDescription(_ text: String) -> Bool {
+        let textPred = NSPredicate(format:"SELF MATCHES %@", foodDescriptionPattern)
+        return textPred.evaluate(with: text)
+    }
     
     //Validate the Email address with Regex
     static func isValidEmail(_ email: String) -> Bool {
@@ -66,11 +87,11 @@ class InputFieldValidator {
     }
     
     //Check if the provided data is EMPTY or NULL
-    static func isEmptyOrNil(_ text: String?) -> Bool {
-        if text == "" || text == nil{
-            return true
-        }else{
+    static func isNotEmptyOrNil(_ text: String?) -> Bool {
+        if text == nil || text == "" {
             return false
+        } else{
+            return true
         }
     }
 }
