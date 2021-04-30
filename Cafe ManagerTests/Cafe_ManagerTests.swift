@@ -94,14 +94,15 @@ class CafeManagerRegisterTests : XCTestCase, FirebaseActions {
     
     func testRegistration() {
         firebaseOP.delegate = self
+        result = expectation(description: "Successful signup!")
         let user = User(_id: "",
-                        userName: "Nimesh Lakshan",
-                        email: "nimeshlakshan923@gmail.com",
-                        phoneNo: "0777721525",
-                        password: "Kzqq1430", imageRes: "")
+                        userName: "Nimesh lankashan",
+                        email: "nimeshlakshan123@gmail.com",
+                        phoneNo: "0712266686",
+                        password: "admin@123", imageRes: "")
         firebaseOP.registerUser(user: user)
-//        expectation(for: NSPredicate(format : "equals == true"), evaluatedWith: userRegistered, handler: nil)
-//        waitForExpectations(timeout: 10)
+        waitForExpectations(timeout: 10)
+        XCTAssertEqual(self.userRegistered, true)
     }
     
     func isExisitingUser(error: String) {
@@ -116,39 +117,6 @@ class CafeManagerRegisterTests : XCTestCase, FirebaseActions {
     
     func isSignUpFailedWithError(error: String) {
         userRegistered = false
-        result.fulfill()
-    }
-    
-    func onConnectionLost() {
-        
-    }
-}
-
-class CafeManagerLoginTests : XCTestCase, FirebaseActions {
-    private var result: XCTestExpectation!
-    let firebaseOP = FirebaseOP.instance
-    var userFound = false
-    
-    func testLogin() {
-        firebaseOP.delegate = self
-        result = expectation(description: "Successful login!")
-        firebaseOP.signInUser(email: "nimeshlakshan923@gmail.com", password: "Kzqq1430")
-        waitForExpectations(timeout: 10)
-        XCTAssertEqual(self.userFound, true)
-    }
-    
-    func onUserSignInSuccess(user: User?) {
-        userFound = true
-        result.fulfill()
-    }
-    
-    func onUserSignInFailedWithError(error: String) {
-        userFound = false
-        result.fulfill()
-    }
-    
-    func onUserNotRegistered(error: String) {
-        userFound = false
         result.fulfill()
     }
     
