@@ -30,4 +30,129 @@ class Cafe_ManagerTests: XCTestCase {
         }
     }
 
+    func testLoginValidations() throws {
+        //Testing a valid email
+        XCTAssertTrue(InputFieldValidator.isValidEmail("nimeshlakshan923@gmail.com"))
+        
+        //Testing an invalid email
+        XCTAssertFalse(InputFieldValidator.isValidEmail("nimesh@_gmail.com"))
+        
+        //Testing an invalid email
+        XCTAssertFalse(InputFieldValidator.isValidEmail("nimesh@_gmail.@13"))
+        
+        //Testing a valid password
+        XCTAssertTrue(InputFieldValidator.isValidPassword(pass: "Kzqq1430", minLength: 6, maxLength: 20))
+        
+        //Testing n invalid password
+        XCTAssertFalse(InputFieldValidator.isValidPassword(pass: "1234", minLength: 6, maxLength: 20))
+        
+        //Testing an invalid password
+        XCTAssertFalse(InputFieldValidator.isValidPassword(pass: "Kzqq1430@1234Kzqq123421234Kzqq1430", minLength: 6, maxLength: 20))
+    }
+    
+    func testSignUpValidations() throws {
+        //Testing a valid name
+        XCTAssertTrue(InputFieldValidator.isValidName("nimesh"))
+        
+        //Testing an invalid name
+        XCTAssertFalse(InputFieldValidator.isValidName("Nimesh1234"))
+        
+        //Testing an invalid name
+        XCTAssertFalse(InputFieldValidator.isValidName(""))
+        
+        //Testing a valid email
+        XCTAssertTrue(InputFieldValidator.isValidEmail("nimeshlakshan923@gmail.com"))
+        
+        //Testing an invalid email
+        XCTAssertFalse(InputFieldValidator.isValidEmail("nimesh@_gmail.com"))
+        
+        //Testing a valid mobileNo
+        XCTAssertTrue(InputFieldValidator.isValidMobileNo("0777721525"))
+        
+        //Testing an invalid mobileNo
+        XCTAssertFalse(InputFieldValidator.isValidMobileNo("0112345678"))
+        
+        //Testing an invalid mobileNo
+        XCTAssertFalse(InputFieldValidator.isValidMobileNo("077721525"))
+        
+        //Testing an invalid mobileNo
+        XCTAssertFalse(InputFieldValidator.isValidMobileNo("07777a1525"))
+        
+        //Testing a valid password
+        XCTAssertTrue(InputFieldValidator.isValidPassword(pass: "Kzqq1430", minLength: 6, maxLength: 20))
+        
+        //Testing n invalid password
+        XCTAssertFalse(InputFieldValidator.isValidPassword(pass: "1234", minLength: 6, maxLength: 20))
+    }
+
+}
+
+class CafeManagerRegisterTests : XCTestCase, FirebaseActions {
+    private var result: XCTestExpectation!
+    let firebaseOP = FirebaseOP.instance
+    var userRegistered = false
+    
+    func testRegistration() {
+        firebaseOP.delegate = self
+        let user = User(_id: "",
+                        userName: "Nimesh Lakshan",
+                        email: "nimeshlakshan923@gmail.com",
+                        phoneNo: "0777721525",
+                        password: "Kzqq1430", imageRes: "")
+        firebaseOP.registerUser(user: user)
+//        expectation(for: NSPredicate(format : "equals == true"), evaluatedWith: userRegistered, handler: nil)
+//        waitForExpectations(timeout: 10)
+    }
+    
+    func isExisitingUser(error: String) {
+        userRegistered = false
+        result.fulfill()
+    }
+    
+    func isSignUpSuccessful(user: User?) {
+        userRegistered = true
+        result.fulfill()
+    }
+    
+    func isSignUpFailedWithError(error: String) {
+        userRegistered = false
+        result.fulfill()
+    }
+    
+    func onConnectionLost() {
+        
+    }
+}
+
+class CafeManagerLoginTests : XCTestCase, FirebaseActions {
+    private var result: XCTestExpectation!
+    let firebaseOP = FirebaseOP.instance
+    var userFound = false
+    
+    func testLogin() {
+        firebaseOP.delegate = self
+        result = expectation(description: "Successful login!")
+        firebaseOP.signInUser(email: "nimeshlakshan923@gmail.com", password: "Kzqq1430")
+        waitForExpectations(timeout: 10)
+        XCTAssertEqual(self.userFound, true)
+    }
+    
+    func onUserSignInSuccess(user: User?) {
+        userFound = true
+        result.fulfill()
+    }
+    
+    func onUserSignInFailedWithError(error: String) {
+        userFound = false
+        result.fulfill()
+    }
+    
+    func onUserNotRegistered(error: String) {
+        userFound = false
+        result.fulfill()
+    }
+    
+    func onConnectionLost() {
+        
+    }
 }
